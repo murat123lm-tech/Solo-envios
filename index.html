@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Envíos - Cotizador Gratis</title>
+    <title>Solo Envíos - Cotizador de Zonas</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -14,55 +13,57 @@
         :root {
             --color-violeta: #6C29BE;
             --color-amarillo: #FFD700;
-            --color-secundario: #25D366;
         }
         body { background-color: var(--color-violeta); font-family: 'Segoe UI', sans-serif; color: white; margin: 0; }
         .navbar { background: white; border-bottom: 3px solid var(--color-amarillo); padding: 15px; }
-        .hero-section { background: white; color: #333; padding: 40px 0; border-radius: 0 0 40px 40px; text-align: center; }
+        .hero-section { background: white; color: #333; padding: 30px 0; border-radius: 0 0 40px 40px; text-align: center; }
         .cotizador-card { 
-            background: white; color: #333; border-radius: 20px; 
+            background: white; color: #333; border-radius: 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: none; 
-            padding: 20px; margin-top: -30px;
+            padding: 25px; margin-top: -20px;
         }
-        #map { height: 350px; width: 100%; border-radius: 15px; border: 2px solid #ddd; margin-bottom: 20px; }
+        #map { height: 400px; width: 100%; border-radius: 15px; border: 2px solid #ddd; }
         .precio-box { 
             background-color: var(--color-amarillo); color: var(--color-violeta); 
-            border-radius: 15px; padding: 15px; text-align: center; display: none;
+            border-radius: 20px; padding: 20px; text-align: center; margin-top: 20px;
+            border: 3px solid var(--color-violeta);
         }
-        #precio-final { font-size: 2.5rem; font-weight: 900; margin: 0; }
-        .btn-whatsapp { 
-            background-color: var(--color-secundario); color: white; border: none; 
-            padding: 12px; border-radius: 50px; font-weight: bold; width: 100%; 
-            display: none; margin-top: 15px; text-decoration: none; text-align: center;
-        }
+        #precio-final { font-size: 3rem; font-weight: 900; margin: 0; }
+        .btn-buscar { background-color: var(--color-violeta); color: white; border-radius: 30px; font-weight: bold; }
+        .btn-buscar:hover { background-color: #5519a1; color: white; }
     </style>
 </head>
 <body>
 
     <nav class="navbar shadow-sm">
         <div class="container justify-content-center">
-            <span class="fs-4 fw-bold" style="color: var(--color-violeta)">SOLO ENVÍOS</span>
+            <span class="fs-3 fw-bold" style="color: var(--color-violeta)">SOLO ENVÍOS</span>
         </div>
     </nav>
 
     <div class="hero-section">
         <div class="container">
-            <h1 class="fw-bold h3">Cotizá tu Envío en San Miguel</h1>
-            <p class="text-muted small">Seleccioná la zona de entrega en el mapa</p>
+            <h1 class="fw-bold h2">Calculá tu Envío</h1>
+            <p class="text-muted">Ingresá tu dirección en San Miguel o alrededores</p>
         </div>
     </div>
 
     <div class="container pb-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <div class="cotizador-card">
                     
+                    <div class="input-group mb-3">
+                        <input type="text" id="input-direccion" class="form-control form-control-lg rounded-pill-start" placeholder="Ej: Av. Ricardo Balbín 1500, San Miguel">
+                        <button class="btn btn-buscar px-4" id="btn-ubicar">Ubicar en Mapa</button>
+                    </div>
+
                     <div id="map"></div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">O elegí la zona manualmente:</label>
-                        <select class="form-select" id="select-zona">
-                            <option value="" selected disabled>Seleccioná una zona...</option>
+                    <div class="mt-4">
+                        <label class="form-label fw-bold">Seleccioná la Zona para ver el precio:</label>
+                        <select class="form-select form-select-lg" id="select-zona" style="border: 2px solid var(--color-violeta); border-radius: 15px;">
+                            <option value="" selected disabled>Elegí una ubicación...</option>
                             <option value="3500">Zona 1 - Centro San Miguel</option>
                             <option value="4000">Zona 2 - Muñiz / Bella Vista</option>
                             <option value="4500">Zona 3 - Sta. María / Trujui</option>
@@ -72,50 +73,55 @@
                         </select>
                     </div>
 
-                    <div id="resultado" class="precio-box">
-                        <p class="mb-0 fw-bold">COSTO DEL ENVÍO:</p>
+                    <div id="resultado" class="precio-box" style="display: none;">
+                        <p class="mb-0 fw-bold">VALOR DEL ENVÍO:</p>
                         <p id="precio-final">$0</p>
+                        <p class="small mb-0">Cotización vigente para el día de hoy.</p>
                     </div>
 
-                    <a id="btn-whatsapp" href="#" target="_blank" class="btn btn-whatsapp">
-                        Pedir Envío por WhatsApp
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. Inicializar mapa centrado en San Miguel
-        var map = L.map('map').setView([-34.542, -58.712], 13);
+        // Inicializar mapa en San Miguel
+        var map = L.map('map').setView([-34.542, -58.712], 14);
 
-        // 2. Cargar capas de OpenStreetMap (Gratis)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 3. Agregar un marcador movible para que el cliente marque dónde es
         var marker = L.marker([-34.542, -58.712], {draggable: true}).addTo(map);
-        marker.bindPopup("<b>Arrastrame hasta tu entrega</b>").openPopup();
 
-        // Lógica de precios
+        // FUNCIÓN PARA BUSCAR LA DIRECCIÓN (GRATIS)
+        document.getElementById('btn-ubicar').addEventListener('click', function() {
+            var dir = document.getElementById('input-direccion').value;
+            if (dir.length < 5) return alert("Por favor ingresá una dirección real.");
+
+            // Buscamos usando el servicio gratuito de Nominatim
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir + ", San Miguel, Buenos Aires")}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        var lat = data[0].lat;
+                        var lon = data[0].lon;
+                        map.setView([lat, lon], 16);
+                        marker.setLatLng([lat, lon]);
+                    } else {
+                        alert("No pudimos encontrar esa dirección. Intentá ser más específico.");
+                    }
+                });
+        });
+
+        // LÓGICA DE PRECIOS
         const selector = document.getElementById('select-zona');
         const resultado = document.getElementById('resultado');
         const precioFinal = document.getElementById('precio-final');
-        const btnWhatsapp = document.getElementById('btn-whatsapp');
 
         selector.addEventListener('change', function() {
-            const precio = this.value;
-            const nombreZona = this.options[this.selectedIndex].text;
-            
-            precioFinal.innerText = `$${precio}`;
+            precioFinal.innerText = `$${this.value}`;
             resultado.style.display = 'block';
-            btnWhatsapp.style.display = 'block';
-
-            // CONFIGURÁ TU WHATSAPP AQUÍ
-            const miTelefono = "5491112345678"; 
-            const mensaje = `Hola Solo Envíos! Quiero un envío a ${nombreZona}. Precio: $${precio}.`;
-            btnWhatsapp.href = `https://wa.me/${miTelefono}?text=${encodeURIComponent(mensaje)}`;
         });
     </script>
 </body>
