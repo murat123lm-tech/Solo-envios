@@ -8,33 +8,33 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        :root { --color-v: #6C29BE; --color-a: #FFD700; }
-        body { background-color: var(--color-v); font-family: sans-serif; color: white; padding: 20px 0; }
-        .card-solo { background: white; color: #333; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #map { height: 350px; width: 100%; border-radius: 15px; margin: 15px 0; border: 2px solid #eee; }
-        .btn-solo { background: var(--color-v); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; }
-        .precio-box { background: var(--color-a); color: var(--color-v); border-radius: 15px; padding: 15px; text-align: center; margin-top: 15px; display: none; border: 3px solid var(--color-v); }
-        label { font-weight: bold; color: var(--color-v); margin-bottom: 5px; display: block; }
+        :root { --v: #6C29BE; --a: #FFD700; }
+        body { background: var(--v); color: white; padding-top: 30px; font-family: sans-serif; }
+        .box { background: white; color: #333; border-radius: 20px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        #map { height: 300px; width: 100%; border-radius: 15px; margin: 15px 0; border: 1px solid #ccc; }
+        .btn-calc { background: var(--v); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 100%; font-size: 1.2rem; }
+        .res { background: var(--a); color: var(--v); border-radius: 15px; padding: 15px; text-align: center; margin-top: 15px; display: none; border: 3px solid var(--v); }
+        label { font-weight: bold; color: var(--v); margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card-solo text-center mb-3">
-                    <h2 style="color: var(--color-v); font-weight: 900;">SOLO ENVÍOS</h2>
-                </div>
-                <div class="card-solo">
-                    <label>📍 PUNTO DE RETIRO:</label>
-                    <input type="text" id="r" class="form-control mb-3" placeholder="Dirección de retiro...">
+            <div class="col-md-6">
+                <div class="box text-center mb-3"><h2 style="color: var(--v); font-weight: 900; margin:0;">SOLO ENVÍOS</h2></div>
+                <div class="box">
+                    <label>📍 DIRECCIÓN DE RETIRO:</label>
+                    <input type="text" id="r" class="form-control" placeholder="Ej: Tribulato 1000, San Miguel">
                     
-                    <label>🏁 PUNTO DE ENTREGA:</label>
-                    <input type="text" id="e" class="form-control mb-3" placeholder="Dirección de entrega...">
+                    <label>🏁 DIRECCIÓN DE ENTREGA:</label>
+                    <input type="text" id="e" class="form-control" placeholder="Ej: Peron 1800, San Miguel">
                     
-                    <button class="btn-solo" id="btn">CALCULAR TARIFA</button>
+                    <button class="btn-calc" id="btn">CALCULAR TARIFA</button>
+                    
                     <div id="map"></div>
-                    <div id="res" class="precio-box">
-                        <p class="mb-0 fw-bold">TARIFA:</p>
+                    
+                    <div id="res" class="res">
+                        <p class="mb-0 fw-bold text-uppercase">Costo del envío:</p>
                         <h2 id="p" style="font-weight: 900; font-size: 3rem; margin: 0;">$0</h2>
                     </div>
                 </div>
@@ -44,30 +44,30 @@
     <script>
         var m = L.map('map').setView([-34.542, -58.712], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
-        var mR = L.marker([-34.542, -58.712], {draggable:true}).addTo(m);
-        var mE = L.marker([-34.545, -58.715], {draggable:true}).addTo(m);
+        var m1 = L.marker([-34.542, -58.712], {draggable:true}).addTo(m);
+        var m2 = L.marker([-34.545, -58.715], {draggable:true}).addTo(m);
 
         document.getElementById('btn').onclick = function() {
             var vR = document.getElementById('r').value;
             var vE = document.getElementById('e').value;
-            if(!vR || !vE) return alert("Completá retiro y entrega");
+            if(!vR || !vE) return alert("Poné las dos direcciones");
 
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(vR + ", San Miguel")}`)
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(vR + ", San Miguel, Buenos Aires")}`)
             .then(res => res.json()).then(dR => {
                 if(dR[0]) {
-                    mR.setLatLng([dR[0].lat, dR[0].lon]);
-                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(vE + ", San Miguel")}`)
+                    m1.setLatLng([dR[0].lat, dR[0].lon]);
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(vE + ", San Miguel, Buenos Aires")}`)
                     .then(res => res.json()).then(dE => {
                         if(dE[0]) {
-                            mE.setLatLng([dE[0].lat, dE[0].lon]);
-                            m.fitBounds(L.featureGroup([mR, mE]).getBounds().pad(0.3));
-                            var d = m.distance(mR.getLatLng(), mE.getLatLng()) / 1000;
+                            m2.setLatLng([dE[0].lat, dE[0].lon]);
+                            m.fitBounds(L.featureGroup([m1, m2]).getBounds().pad(0.3));
+                            var d = m.distance(m1.getLatLng(), m2.getLatLng()) / 1000;
                             var t = d <= 2 ? 3500 : d <= 5 ? 4500 : 6000;
                             document.getElementById('p').innerText = `$${t}`;
                             document.getElementById('res').style.display = 'block';
                         }
                     });
-                }
+                } else { alert("No encontré la dirección"); }
             });
         };
     </script>
