@@ -11,61 +11,65 @@
 
     <style>
         :root { --color-violeta: #6C29BE; --color-amarillo: #FFD700; }
-        body { background-color: var(--color-violeta); font-family: 'Segoe UI', sans-serif; color: white; }
-        .navbar { background: white; border-bottom: 3px solid var(--color-amarillo); padding: 15px; }
-        .hero-section { background: white; color: #333; padding: 20px 0; border-radius: 0 0 40px 40px; text-align: center; }
+        body { background-color: var(--color-violeta); font-family: 'Segoe UI', sans-serif; color: white; padding-bottom: 50px; }
+        .navbar { background: white; border-bottom: 4px solid var(--color-amarillo); padding: 15px; }
+        .hero-section { background: white; color: #333; padding: 20px 0; border-radius: 0 0 40px 40px; text-align: center; margin-bottom: 25px; }
         .cotizador-card { 
             background: white; color: #333; border-radius: 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: none; 
-            padding: 25px; margin-top: -20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: none; 
+            padding: 25px;
         }
-        #map { height: 350px; width: 100%; border-radius: 15px; border: 2px solid #ddd; margin: 15px 0; z-index: 1; }
+        #map { height: 350px; width: 100%; border-radius: 15px; border: 2px solid #ddd; margin: 20px 0; z-index: 1; }
         .precio-box { 
             background-color: var(--color-amarillo); color: var(--color-violeta); 
             border-radius: 20px; padding: 20px; text-align: center; margin-top: 15px;
             border: 3px solid var(--color-violeta); display: none;
         }
         #precio-final { font-size: 3rem; font-weight: 900; margin: 0; }
-        .btn-cotizar { background-color: var(--color-violeta); color: white; border-radius: 15px; font-weight: bold; width: 100%; margin-top: 10px; border: none; padding: 12px; }
-        .form-label { color: var(--color-violeta); font-weight: bold; margin-bottom: 5px; }
-        .form-control { border: 2px solid #eee; border-radius: 12px; margin-bottom: 10px; }
+        .btn-cotizar { background-color: var(--color-violeta); color: white; border-radius: 15px; font-weight: bold; width: 100%; border: none; padding: 15px; font-size: 1.2rem; transition: 0.3s; }
+        .btn-cotizar:hover { background-color: #5519a1; transform: translateY(-2px); }
+        .form-label { color: var(--color-violeta); font-weight: 900; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .form-control { border: 2px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 15px; font-size: 1rem; }
+        .form-control:focus { border-color: var(--color-violeta); box-shadow: none; }
     </style>
 </head>
 <body>
 
     <nav class="navbar shadow-sm">
         <div class="container justify-content-center">
-            <span class="fs-3 fw-bold" style="color: var(--color-violeta)">SOLO ENVÍOS</span>
+            <span class="fs-2 fw-bold" style="color: var(--color-violeta)">SOLO ENVÍOS</span>
         </div>
     </nav>
 
     <div class="hero-section">
-        <div class="container"><h1 class="fw-bold h4">Calculá tu Tarifa de Envío</h1></div>
+        <div class="container">
+            <h1 class="fw-bold h4 mb-0">CALCULADORA DE TARIFAS</h1>
+        </div>
     </div>
 
-    <div class="container pb-5">
+    <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-9">
+            <div class="col-md-8 col-lg-6">
                 <div class="cotizador-card">
                     
-                    <div class="mb-2">
-                        <label class="form-label">📍 DIRECCIÓN DE RETIRO:</label>
+                    <div class="form-group">
+                        <label class="form-label">📍 PUNTO DE RETIRO (Origen):</label>
                         <input type="text" id="dir-retiro" class="form-control" placeholder="Ej: Av. Ricardo Balbín 1500, San Miguel">
                     </div>
 
-                    <div class="mb-2">
-                        <label class="form-label">🏁 DIRECCIÓN DE ENTREGA:</label>
+                    <div class="form-group">
+                        <label class="form-label">🏁 PUNTO DE ENTREGA (Destino):</label>
                         <input type="text" id="dir-entrega" class="form-control" placeholder="Ej: Av. Presidente Perón 1850, San Miguel">
                     </div>
 
-                    <button class="btn-cotizar" id="btn-calcular">CALCULAR TARIFA</button>
+                    <button class="btn-cotizar" id="btn-calcular">CALCULAR COSTO</button>
 
                     <div id="map"></div>
 
                     <div id="resultado" class="precio-box">
-                        <p class="mb-0 fw-bold">TARIFA ESTIMADA:</p>
+                        <p class="mb-0 fw-bold">VALOR DEL VIAJE:</p>
                         <p id="precio-final">$0</p>
-                        <small id="detalle-distancia" class="text-muted fw-bold"></small>
+                        <small id="detalle-distancia" class="fw-bold" style="opacity: 0.8;"></small>
                     </div>
 
                 </div>
@@ -74,55 +78,56 @@
     </div>
 
     <script>
-        // Inicializar mapa
         var map = L.map('map').setView([-34.5422, -58.7123], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        var markerRetiro = L.marker([-34.543, -58.713], {draggable: true}).addTo(map).bindPopup("Retiro");
-        var markerEntrega = L.marker([-34.545, -58.715], {draggable: true}).addTo(map).bindPopup("Entrega");
+        var markerRetiro = L.marker([-34.5422, -58.7123], {draggable: true}).addTo(map);
+        var markerEntrega = L.marker([-34.545, -58.715], {draggable: true}).addTo(map);
 
         document.getElementById('btn-calcular').addEventListener('click', function() {
             var r = document.getElementById('dir-retiro').value;
             var e = document.getElementById('dir-entrega').value;
 
-            if(!r || !e) return alert("Por favor, completá ambas direcciones.");
+            if(!r || !e) {
+                alert("Por favor, ingresá las dos direcciones.");
+                return;
+            }
 
-            // Buscamos coordenadas de Retiro
+            // Buscar Retiro
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(r + ", San Miguel, Buenos Aires")}`)
             .then(res => res.json())
             .then(dataR => {
                 if(dataR.length > 0) {
                     var latR = dataR[0].lat; var lonR = dataR[0].lon;
-                    markerRetiro.setLatLng([latR, lonR]);
+                    markerRetiro.setLatLng([latR, lonR]).bindPopup("RETIRO").openPopup();
 
-                    // Buscamos coordenadas de Entrega
+                    // Buscar Entrega
                     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e + ", San Miguel, Buenos Aires")}`)
                     .then(res => res.json())
                     .then(dataE => {
                         if(dataE.length > 0) {
                             var latE = dataE[0].lat; var lonE = dataE[0].lon;
-                            markerEntrega.setLatLng([latE, lonE]);
+                            markerEntrega.setLatLng([latE, lonE]).bindPopup("ENTREGA");
                             
-                            // Ajustar mapa para ver ambos puntos
                             var group = new L.featureGroup([markerRetiro, markerEntrega]);
-                            map.fitBounds(group.getBounds().pad(0.2));
+                            map.fitBounds(group.getBounds().pad(0.3));
 
-                            // CALCULAR TARIFA SEGÚN DISTANCIA (Simulando zonas)
+                            // LÓGICA DE TARIFAS POR KM
                             var dist = map.distance(markerRetiro.getLatLng(), markerEntrega.getLatLng()) / 1000;
                             var tarifa = 0;
 
-                            // Lógica de Precios por KM (Ajustala a tu gusto)
-                            if(dist <= 2) tarifa = 3500; // Zona Centro
-                            else if(dist <= 5) tarifa = 4500; // Zonas aledañas
-                            else if(dist <= 8) tarifa = 5500; // José C. Paz / Polvorines
-                            else tarifa = 6500; // Más lejos
+                            if(dist <= 2) tarifa = 3500;
+                            else if(dist <= 4) tarifa = 4200;
+                            else if(dist <= 7) tarifa = 5500;
+                            else if(dist <= 10) tarifa = 6800;
+                            else tarifa = 8500;
 
                             document.getElementById('precio-final').innerText = `$${tarifa}`;
                             document.getElementById('detalle-distancia').innerText = `Distancia: ${dist.toFixed(1)} km`;
                             document.getElementById('resultado').style.display = 'block';
-                        }
+                        } else { alert("No se encontró la dirección de entrega."); }
                     });
-                }
+                } else { alert("No se encontró la dirección de retiro."); }
             });
         });
     </script>
