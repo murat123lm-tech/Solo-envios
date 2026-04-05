@@ -14,142 +14,122 @@
     <style>
         :root { --v: #6C29BE; --a: #FFD700; --gray: #f8f9fa; }
         body { background: var(--gray); font-family: 'Inter', sans-serif; color: #333; }
-        
-        /* Header Estilizado */
         .navbar { background: var(--v); padding: 20px; border-bottom: 5px solid var(--a); }
-        .logo-text { color: white; font-weight: 900; letter-spacing: -1px; font-size: 1.8rem; }
-
-        /* Contenedor Principal */
+        .logo-text { color: white; font-weight: 900; font-size: 1.8rem; }
         .main-card { 
-            background: white; border-radius: 30px; border: none; 
-            box-shadow: 0 20px 40px rgba(108, 41, 190, 0.1); 
-            padding: 30px; margin-top: -40px;
+            background: white; border-radius: 30px; padding: 30px; 
+            margin-top: -40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
         }
-
-        /* Inputs con Iconos */
-        .input-group-text { background: white; border-right: none; color: var(--v); border-radius: 15px 0 0 15px; }
-        .form-control { border-left: none; border-radius: 0 15px 15px 0; padding: 12px; border: 1px solid #dee2e6; }
-        .form-control:focus { box-shadow: none; border-color: #dee2e6; }
-
-        /* Botón con Spinner */
+        .form-control { border-radius: 12px; padding: 12px; border: 2px solid #eee; }
+        .form-control:focus { border-color: var(--v); box-shadow: none; }
         .btn-calc { 
             background: var(--v); color: white; border: none; padding: 15px; 
-            border-radius: 15px; font-weight: 700; width: 100%; 
-            transition: 0.3s; font-size: 1.1rem;
+            border-radius: 15px; font-weight: 700; width: 100%; font-size: 1.1rem;
         }
-        .btn-calc:hover { background: #5519a1; transform: translateY(-2px); }
-        .btn-calc:disabled { opacity: 0.7; }
-
-        #map { height: 350px; width: 100%; border-radius: 20px; margin: 25px 0; border: 4px solid var(--gray); }
-
-        /* Cuadro de Resultado Profesional */
+        #map { height: 350px; width: 100%; border-radius: 20px; margin: 20px 0; border: 2px solid #eee; }
         .res-card { 
             background: var(--a); color: var(--v); border-radius: 20px; 
-            padding: 25px; text-align: center; display: none;
-            border: 2px dashed var(--v); animation: slideUp 0.5s ease;
+            padding: 20px; text-align: center; display: none; border: 2px solid var(--v);
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .price-tag { font-size: 3.5rem; font-weight: 900; line-height: 1; margin: 10px 0; }
-        .loader { display: none; width: 20px; height: 20px; border: 3px solid #fff; border-bottom-color: transparent; border-radius: 50%; animation: rotation 1s linear infinite; display: inline-block; margin-right: 10px; }
+        .price-tag { font-size: 3rem; font-weight: 900; margin: 5px 0; }
+        .loader { width: 20px; height: 20px; border: 3px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; margin-right: 10px; vertical-align: middle; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="container justify-content-center">
-            <span class="logo-text"><i class="fa-solid fa-truck-fast"></i> SOLO ENVÍOS</span>
-        </div>
+    <nav class="navbar text-center">
+        <span class="logo-text"><i class="fa-solid fa-truck-fast"></i> SOLO ENVÍOS</span>
     </nav>
 
-    <div style="height: 100px; background: var(--v);"></div>
+    <div style="height: 80px; background: var(--v);"></div>
 
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-6">
+            <div class="col-md-7">
                 <div class="main-card">
-                    <h5 class="fw-bold mb-4 text-center">Cotizador de Logística Instantáneo</h5>
-                    
                     <div class="mb-3">
-                        <label class="small fw-bold text-muted text-uppercase">Punto de Origen</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                            <input type="text" id="r" class="form-control" placeholder="Ej: Calle y altura, San Miguel">
-                        </div>
+                        <label class="fw-bold small text-muted">📍 PUNTO DE RETIRO</label>
+                        <input type="text" id="r" class="form-control" placeholder="Calle y altura, San Miguel">
                     </div>
 
                     <div class="mb-4">
-                        <label class="small fw-bold text-muted text-uppercase">Destino Final</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-flag-checkered"></i></span>
-                            <input type="text" id="e" class="form-control" placeholder="Ej: Calle y altura, San Miguel">
-                        </div>
+                        <label class="fw-bold small text-muted">🏁 PUNTO DE ENTREGA</label>
+                        <input type="text" id="e" class="form-control" placeholder="Calle y altura, San Miguel">
                     </div>
 
                     <button class="btn-calc" id="btn">
-                        <span id="load" class="loader" style="display: none;"></span>
+                        <span id="load" class="loader" style="display:none"></span>
                         CALCULAR TARIFA
                     </button>
 
                     <div id="map"></div>
 
                     <div id="res" class="res-card">
-                        <span class="badge bg-white text-dark mb-2">TARIFA ESTIMADA</span>
+                        <span class="fw-bold">TARIFA ESTIMADA</span>
                         <div class="price-tag" id="p">$0</div>
-                        <p class="small mb-0 fw-bold"><i class="fa-solid fa-circle-info"></i> El precio puede variar según el bulto.</p>
+                        <p class="small mb-0">Basado en recorrido por calles principales.</p>
                     </div>
                 </div>
-                <p class="text-center mt-4 text-muted small">© 2026 Solo Envíos Logística - San Miguel</p>
             </div>
         </div>
     </div>
 
     <script>
-        var m = L.map('map', {zoomControl: false}).setView([-34.542, -58.712], 13);
+        // Configuración inicial del mapa
+        var m = L.map('map', { zoomControl: true }).setView([-34.542, -58.712], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
-        L.control.zoom({ position: 'bottomright' }).addTo(m);
 
-        var mR = L.marker([-34.542, -58.712], {draggable:true}).addTo(m);
-        var mE = L.marker([-34.545, -58.715], {draggable:true}).addTo(m);
+        var mR = L.marker([-34.542, -58.712], {draggable:true}).addTo(m).bindPopup("Retiro");
+        var mE = L.marker([-34.545, -58.715], {draggable:true}).addTo(m).bindPopup("Entrega");
+
+        async function geo(dir) {
+            // Reforzamos la búsqueda para San Miguel, Buenos Aires
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir + ", San Miguel, Buenos Aires, Argentina")}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            return data.length > 0 ? { lat: data[0].lat, lon: data[0].lon } : null;
+        }
 
         document.getElementById('btn').onclick = async function() {
-            const vR = document.getElementById('r').value;
-            const vE = document.getElementById('e').value;
-            const btn = this;
+            const rVal = document.getElementById('r').value;
+            const eVal = document.getElementById('e').value;
             const loader = document.getElementById('load');
+            const btn = this;
 
-            if(!vR || !vE) return alert("Por favor, completá ambas direcciones.");
+            if(!rVal || !eVal) return alert("Ingresá ambas direcciones");
 
-            // UI de carga
             btn.disabled = true;
             loader.style.display = 'inline-block';
 
-            try {
-                const resR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(vR + ", San Miguel, Buenos Aires")}`).then(r => r.json());
-                const resE = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(vE + ", San Miguel, Buenos Aires")}`).then(r => r.json());
+            const cR = await geo(rVal);
+            const cE = await geo(eVal);
 
-                if(resR[0] && resE[0]) {
-                    mR.setLatLng([resR[0].lat, resR[0].lon]);
-                    mE.setLatLng([resE[0].lat, resE[0].lon]);
-                    
-                    m.fitBounds(L.featureGroup([mR, mE]).getBounds().pad(0.4), {animate: true});
+            if(cR && cE) {
+                // MOVER MARCADORES
+                mR.setLatLng([cR.lat, cR.lon]);
+                mE.setLatLng([cE.lat, cE.lon]);
 
-                    var dist = m.distance(mR.getLatLng(), mE.getLatLng()) / 1000;
-                    var t = dist <= 2 ? 3500 : dist <= 5 ? 4500 : 6000;
+                // ¡ACÁ ESTÁ EL MOVIMIENTO! 
+                // Usamos flyToBounds para que el mapa "vuele" y se mueva suave
+                var group = new L.featureGroup([mR, mE]);
+                m.flyToBounds(group.getBounds().pad(0.3), {
+                    animate: true,
+                    duration: 1.5 // Duración del vuelo en segundos
+                });
 
-                    document.getElementById('p').innerText = `$${t}`;
-                    document.getElementById('res').style.display = 'block';
-                    document.getElementById('res').scrollIntoView({behavior: 'smooth'});
-                } else {
-                    alert("No encontramos una de las direcciones. Intentá poner Calle y Altura.");
-                }
-            } catch (e) {
-                alert("Error de conexión. Reintentá.");
-            } finally {
-                btn.disabled = false;
-                loader.style.display = 'none';
+                // Cálculo de Tarifa
+                var dist = m.distance(mR.getLatLng(), mE.getLatLng()) / 1000;
+                var t = dist <= 2 ? 3500 : dist <= 5 ? 4500 : 6000;
+
+                document.getElementById('p').innerText = `$${t}`;
+                document.getElementById('res').style.display = 'block';
+            } else {
+                alert("No encontramos una dirección. Revisá la numeración.");
             }
+
+            btn.disabled = false;
+            loader.style.display = 'none';
         };
     </script>
 </body>
