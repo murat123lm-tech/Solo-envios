@@ -3,36 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Envíos - Cotizador Pro</title>
+    <title>Solo Envíos - Cotizador Logístico</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        :root {
-            --color-violeta: #6C29BE;
-            --color-amarillo: #FFD700;
-        }
-        body { background-color: var(--color-violeta); font-family: 'Segoe UI', sans-serif; color: white; margin: 0; }
+        :root { --color-violeta: #6C29BE; --color-amarillo: #FFD700; }
+        body { background-color: var(--color-violeta); font-family: 'Segoe UI', sans-serif; color: white; }
         .navbar { background: white; border-bottom: 3px solid var(--color-amarillo); padding: 15px; }
-        .hero-section { background: white; color: #333; padding: 30px 0; border-radius: 0 0 40px 40px; text-align: center; }
+        .hero-section { background: white; color: #333; padding: 20px 0; border-radius: 0 0 40px 40px; text-align: center; }
         .cotizador-card { 
             background: white; color: #333; border-radius: 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: none; 
             padding: 25px; margin-top: -20px;
         }
-        #map { height: 400px; width: 100%; border-radius: 15px; border: 2px solid #ddd; margin-top: 15px; }
+        #map { height: 350px; width: 100%; border-radius: 15px; border: 2px solid #ddd; margin: 15px 0; z-index: 1; }
         .precio-box { 
             background-color: var(--color-amarillo); color: var(--color-violeta); 
-            border-radius: 20px; padding: 20px; text-align: center; margin-top: 20px;
+            border-radius: 20px; padding: 20px; text-align: center; margin-top: 15px;
             border: 3px solid var(--color-violeta); display: none;
         }
         #precio-final { font-size: 3rem; font-weight: 900; margin: 0; }
-        .btn-buscar { background-color: var(--color-violeta); color: white; border-radius: 30px; font-weight: bold; transition: 0.3s; }
-        .btn-buscar:hover { background-color: #5519a1; color: white; transform: scale(1.05); }
-        .form-control { border: 2px solid #ddd; border-radius: 15px; }
-        .form-control:focus { border-color: var(--color-violeta); box-shadow: none; }
+        .btn-cotizar { background-color: var(--color-violeta); color: white; border-radius: 15px; font-weight: bold; width: 100%; margin-top: 10px; border: none; padding: 12px; }
+        .form-label { color: var(--color-violeta); font-weight: bold; margin-bottom: 5px; }
+        .form-control { border: 2px solid #eee; border-radius: 12px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -44,10 +40,7 @@
     </nav>
 
     <div class="hero-section">
-        <div class="container">
-            <h1 class="fw-bold h2">Calculadora de Entregas</h1>
-            <p class="text-muted">Ingresá la dirección exacta para ubicarla en el mapa</p>
-        </div>
+        <div class="container"><h1 class="fw-bold h4">Calculá tu Tarifa de Envío</h1></div>
     </div>
 
     <div class="container pb-5">
@@ -55,34 +48,24 @@
             <div class="col-md-9">
                 <div class="cotizador-card">
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Dirección de entrega:</label>
-                        <div class="input-group">
-                            <input type="text" id="input-direccion" class="form-control form-control-lg" 
-                                   placeholder="AVENIDA PRESIDENTE PERON 1850, SAN MIGUEL, BUENOS AIRES, ARGENTINA">
-                            <button class="btn btn-buscar px-4" id="btn-ubicar">UBICAR</button>
-                        </div>
-                        <small class="text-muted">Ejemplo: Av. Pte. Perón 1500, San Miguel, Buenos Aires, Argentina</small>
+                    <div class="mb-2">
+                        <label class="form-label">📍 DIRECCIÓN DE RETIRO:</label>
+                        <input type="text" id="dir-retiro" class="form-control" placeholder="Ej: Av. Ricardo Balbín 1500, San Miguel">
                     </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">🏁 DIRECCIÓN DE ENTREGA:</label>
+                        <input type="text" id="dir-entrega" class="form-control" placeholder="Ej: Av. Presidente Perón 1850, San Miguel">
+                    </div>
+
+                    <button class="btn-cotizar" id="btn-calcular">CALCULAR TARIFA</button>
 
                     <div id="map"></div>
 
-                    <div class="mt-4">
-                        <label class="form-label fw-bold">Seleccioná la Zona de facturación:</label>
-                        <select class="form-select form-select-lg" id="select-zona" style="border: 2px solid var(--color-violeta); border-radius: 15px;">
-                            <option value="" selected disabled>Elegí una zona...</option>
-                            <option value="3500">Zona 1 - Centro San Miguel</option>
-                            <option value="4000">Zona 2 - Muñiz / Bella Vista</option>
-                            <option value="4500">Zona 3 - Sta. María / Trujui</option>
-                            <option value="4500">Zona 4 - Los Polvorines</option>
-                            <option value="5500">Zona 5 - Jose C. Paz</option>
-                            <option value="6500">Zona 6 - Malvinas Argentinas</option>
-                        </select>
-                    </div>
-
                     <div id="resultado" class="precio-box">
-                        <p class="mb-0 fw-bold">COSTO TOTAL DEL ENVÍO:</p>
+                        <p class="mb-0 fw-bold">TARIFA ESTIMADA:</p>
                         <p id="precio-final">$0</p>
+                        <small id="detalle-distancia" class="text-muted fw-bold"></small>
                     </div>
 
                 </div>
@@ -91,57 +74,56 @@
     </div>
 
     <script>
-        // Configuración inicial del mapa centrado en el centro de San Miguel
-        var map = L.map('map').setView([-34.5422, -58.7123], 15);
+        // Inicializar mapa
+        var map = L.map('map').setView([-34.5422, -58.7123], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        var markerRetiro = L.marker([-34.543, -58.713], {draggable: true}).addTo(map).bindPopup("Retiro");
+        var markerEntrega = L.marker([-34.545, -58.715], {draggable: true}).addTo(map).bindPopup("Entrega");
 
-        var marker = L.marker([-34.5422, -58.7123], {draggable: true}).addTo(map);
+        document.getElementById('btn-calcular').addEventListener('click', function() {
+            var r = document.getElementById('dir-retiro').value;
+            var e = document.getElementById('dir-entrega').value;
 
-        // LÓGICA DE BÚSQUEDA POR TEXTO
-        document.getElementById('btn-ubicar').addEventListener('click', function() {
-            var direccionCompleta = document.getElementById('input-direccion').value;
-            
-            if (direccionCompleta.length < 10) {
-                alert("Por favor, ingresá la dirección completa.");
-                return;
-            }
+            if(!r || !e) return alert("Por favor, completá ambas direcciones.");
 
-            // Llamada a la API gratuita de Nominatim
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccionCompleta)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        var lat = data[0].lat;
-                        var lon = data[0].lon;
-                        
-                        // Mover mapa y marcador
-                        map.setView([lat, lon], 17);
-                        marker.setLatLng([lat, lon]);
-                        marker.bindPopup("<b>Ubicación encontrada</b>").openPopup();
-                    } else {
-                        alert("No pudimos encontrar esa ubicación exacta. Verificá la numeración.");
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Error al conectar con el servidor de mapas.");
-                });
-        });
+            // Buscamos coordenadas de Retiro
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(r + ", San Miguel, Buenos Aires")}`)
+            .then(res => res.json())
+            .then(dataR => {
+                if(dataR.length > 0) {
+                    var latR = dataR[0].lat; var lonR = dataR[0].lon;
+                    markerRetiro.setLatLng([latR, lonR]);
 
-        // LÓGICA DE ACTUALIZACIÓN DE PRECIO
-        const selector = document.getElementById('select-zona');
-        const resultado = document.getElementById('resultado');
-        const precioFinal = document.getElementById('precio-final');
+                    // Buscamos coordenadas de Entrega
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e + ", San Miguel, Buenos Aires")}`)
+                    .then(res => res.json())
+                    .then(dataE => {
+                        if(dataE.length > 0) {
+                            var latE = dataE[0].lat; var lonE = dataE[0].lon;
+                            markerEntrega.setLatLng([latE, lonE]);
+                            
+                            // Ajustar mapa para ver ambos puntos
+                            var group = new L.featureGroup([markerRetiro, markerEntrega]);
+                            map.fitBounds(group.getBounds().pad(0.2));
 
-        selector.addEventListener('change', function() {
-            precioFinal.innerText = `$${this.value}`;
-            resultado.style.display = 'block';
-            
-            // Scroll suave hacia el precio
-            resultado.scrollIntoView({ behavior: 'smooth' });
+                            // CALCULAR TARIFA SEGÚN DISTANCIA (Simulando zonas)
+                            var dist = map.distance(markerRetiro.getLatLng(), markerEntrega.getLatLng()) / 1000;
+                            var tarifa = 0;
+
+                            // Lógica de Precios por KM (Ajustala a tu gusto)
+                            if(dist <= 2) tarifa = 3500; // Zona Centro
+                            else if(dist <= 5) tarifa = 4500; // Zonas aledañas
+                            else if(dist <= 8) tarifa = 5500; // José C. Paz / Polvorines
+                            else tarifa = 6500; // Más lejos
+
+                            document.getElementById('precio-final').innerText = `$${tarifa}`;
+                            document.getElementById('detalle-distancia').innerText = `Distancia: ${dist.toFixed(1)} km`;
+                            document.getElementById('resultado').style.display = 'block';
+                        }
+                    });
+                }
+            });
         });
     </script>
 </body>
